@@ -1,5 +1,14 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <updates>
+    <update version="1.0.1">
+        <files>
+            <file path="Components/LiveSplit.CrankedUp.dll" status="changed"/>
+        </files>
+        <changelog>
+            <change> Added Bonus Levels </change>
+            <change> Auto Start split can work on any level now </change>
+        </changelog>
+    </update>
     <update version="1.0.0">
         <files>
             <file path="Components/LiveSplit.CrankedUp.dll" status="changed"/>

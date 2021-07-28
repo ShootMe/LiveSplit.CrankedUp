@@ -9,7 +9,7 @@ namespace LiveSplit.CrankedUp {
         public float GameTime { get; private set; }
         public MemoryManager Memory { get; private set; }
         public SplitterSettings Settings { get; private set; }
-        private bool lastBoolValue;
+        private bool lastInGame, lastFinished;
         private DateTime splitLate;
 
         public LogicManager(SplitterSettings settings) {
@@ -19,7 +19,8 @@ namespace LiveSplit.CrankedUp {
         }
 
         public void Reset() {
-            lastBoolValue = true;
+            lastInGame = true;
+            lastFinished = true;
             splitLate = DateTime.MaxValue;
             Paused = false;
             Running = false;
@@ -103,8 +104,8 @@ namespace LiveSplit.CrankedUp {
         }
         private void CheckGameStart() {
             bool inGame = Memory.IsInGame();
-            ShouldSplit = inGame && !lastBoolValue && Memory.Level() == 8;
-            lastBoolValue = inGame;
+            ShouldSplit = inGame && !lastInGame && Memory.Level() == (int)SplitLevel.City1;
+            lastInGame = inGame;
         }
         private void CheckLevel(Split split) {
             bool inGame = Memory.IsInGame();
@@ -112,51 +113,20 @@ namespace LiveSplit.CrankedUp {
             bool finished = Memory.FinishedLevel();
 
             SplitLevel level = Utility.GetEnumValue<SplitLevel>(split.Value);
-            switch (level) {
-                case SplitLevel.Any: ShouldSplit = inGame && finished && !lastBoolValue; break;
-                case SplitLevel.City1: ShouldSplit = inGame && levelID == 8 && finished && !lastBoolValue; break;
-                case SplitLevel.City2: ShouldSplit = inGame && levelID == 9 && finished && !lastBoolValue; break;
-                case SplitLevel.City3: ShouldSplit = inGame && levelID == 10 && finished && !lastBoolValue; break;
-                case SplitLevel.City4: ShouldSplit = inGame && levelID == 11 && finished && !lastBoolValue; break;
-                case SplitLevel.City5: ShouldSplit = inGame && levelID == 12 && finished && !lastBoolValue; break;
-                case SplitLevel.City6: ShouldSplit = inGame && levelID == 13 && finished && !lastBoolValue; break;
-                case SplitLevel.City7: ShouldSplit = inGame && levelID == 14 && finished && !lastBoolValue; break;
-                case SplitLevel.City8: ShouldSplit = inGame && levelID == 15 && finished && !lastBoolValue; break;
-                case SplitLevel.City9: ShouldSplit = inGame && levelID == 16 && finished && !lastBoolValue; break;
-                case SplitLevel.City10: ShouldSplit = inGame && levelID == 19 && finished && !lastBoolValue; break;
-                case SplitLevel.City11: ShouldSplit = inGame && levelID == 20 && finished && !lastBoolValue; break;
-                case SplitLevel.City12: ShouldSplit = inGame && levelID == 21 && finished && !lastBoolValue; break;
-                case SplitLevel.City13: ShouldSplit = inGame && levelID == 22 && finished && !lastBoolValue; break;
-                case SplitLevel.City14: ShouldSplit = inGame && levelID == 23 && finished && !lastBoolValue; break;
-                case SplitLevel.City15: ShouldSplit = inGame && levelID == 24 && finished && !lastBoolValue; break;
-                case SplitLevel.City16: ShouldSplit = inGame && levelID == 25 && finished && !lastBoolValue; break;
-                case SplitLevel.City17: ShouldSplit = inGame && levelID == 26 && finished && !lastBoolValue; break;
-                case SplitLevel.City18: ShouldSplit = inGame && levelID == 27 && finished && !lastBoolValue; break;
-                case SplitLevel.City19: ShouldSplit = inGame && levelID == 28 && finished && !lastBoolValue; break;
-                case SplitLevel.City20: ShouldSplit = inGame && levelID == 29 && finished && !lastBoolValue; break;
-                case SplitLevel.Western1: ShouldSplit = inGame && levelID == 33 && finished && !lastBoolValue; break;
-                case SplitLevel.Western2: ShouldSplit = inGame && levelID == 34 && finished && !lastBoolValue; break;
-                case SplitLevel.Western3: ShouldSplit = inGame && levelID == 35 && finished && !lastBoolValue; break;
-                case SplitLevel.Western4: ShouldSplit = inGame && levelID == 36 && finished && !lastBoolValue; break;
-                case SplitLevel.Western5: ShouldSplit = inGame && levelID == 37 && finished && !lastBoolValue; break;
-                case SplitLevel.Western6: ShouldSplit = inGame && levelID == 38 && finished && !lastBoolValue; break;
-                case SplitLevel.Western7: ShouldSplit = inGame && levelID == 39 && finished && !lastBoolValue; break;
-                case SplitLevel.Western8: ShouldSplit = inGame && levelID == 40 && finished && !lastBoolValue; break;
-                case SplitLevel.Western9: ShouldSplit = inGame && levelID == 41 && finished && !lastBoolValue; break;
-                case SplitLevel.Western10: ShouldSplit = inGame && levelID == 42 && finished && !lastBoolValue; break;
-                case SplitLevel.Western11: ShouldSplit = inGame && levelID == 43 && finished && !lastBoolValue; break;
-                case SplitLevel.Western12: ShouldSplit = inGame && levelID == 44 && finished && !lastBoolValue; break;
-                case SplitLevel.Western13: ShouldSplit = inGame && levelID == 45 && finished && !lastBoolValue; break;
-                case SplitLevel.Western14: ShouldSplit = inGame && levelID == 46 && finished && !lastBoolValue; break;
-                case SplitLevel.Western15: ShouldSplit = inGame && levelID == 47 && finished && !lastBoolValue; break;
-                case SplitLevel.Western16: ShouldSplit = inGame && levelID == 48 && finished && !lastBoolValue; break;
-                case SplitLevel.Western17: ShouldSplit = inGame && levelID == 49 && finished && !lastBoolValue; break;
-                case SplitLevel.Western18: ShouldSplit = inGame && levelID == 50 && finished && !lastBoolValue; break;
-                case SplitLevel.Western19: ShouldSplit = inGame && levelID == 51 && finished && !lastBoolValue; break;
-                case SplitLevel.Western20: ShouldSplit = inGame && levelID == 52 && finished && !lastBoolValue; break;
+            if (CurrentSplit == 0) {
+                switch (level) {
+                    case SplitLevel.Any: ShouldSplit = inGame && !lastInGame; break;
+                    default: ShouldSplit = inGame && !lastInGame && levelID == (int)level; break;
+                }
+            } else {
+                switch (level) {
+                    case SplitLevel.Any: ShouldSplit = inGame && finished && !lastFinished; break;
+                    default: ShouldSplit = inGame && levelID == (int)level && finished && !lastFinished; break;
+                }
             }
 
-            lastBoolValue = finished;
+            lastInGame = inGame;
+            lastFinished = finished;
         }
     }
 }
